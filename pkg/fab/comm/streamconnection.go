@@ -57,12 +57,13 @@ func NewStreamConnection(ctx fabcontext.Client, chConfig fab.ChannelCfg, streamP
 	}
 
 	if peer.AuthInfo != nil {
-		tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
-		for _, peercert := range tlsInfo.State.PeerCertificates {
-			err := verifier.ValidateCertificateDates(peercert)
-			if err != nil {
-				logger.Error(err)
-				return nil, errors.Wrapf(err, "error validating certificate dates for [%v]", peercert.Subject)
+		if tlsInfo, ok := peer.AuthInfo.(credentials.TLSInfo); ok {
+			for _, peercert := range tlsInfo.State.PeerCertificates {
+				err := verifier.ValidateCertificateDates(peercert)
+				if err != nil {
+					logger.Error(err)
+					return nil, errors.Wrapf(err, "error validating certificate dates for [%v]", peercert.Subject)
+				}
 			}
 		}
 	}
